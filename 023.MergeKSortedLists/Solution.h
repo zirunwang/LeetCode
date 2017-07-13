@@ -1,53 +1,44 @@
 /**
-Given an array S of n integers, are there elements a, b, c, and d in S such that a + b + c + d = target? Find all unique quadruplets in the array which gives the sum of target.
-
-Note: The solution set must not contain duplicate quadruplets.
-
-For example, given array S = [1, 0, -1, 0, -2, 2], and target = 0.
-
-A solution set is:
-[
-  [-1,  0, 0, 1],
-  [-2, -1, 1, 2],
-  [-2,  0, 0, 2]
-]
+Merge k sorted linked lists and return it as one sorted list. Analyze and describe its complexity.
+ */
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
  */
 class Solution {
 public:
-    vector<vector<int>> fourSum(vector<int>& nums, int target) {
-        vector<vector<int> > ret;
-        int n = nums.size();
-        if(n < 4) return ret;
-        sort(nums.begin(), nums.end());
-        //refer to the 3Sum's Solution
-        //use i,j take the place of i
-        for(int i = 0; i < n - 3; i++) {
-            //判断当前锚点是否可能
-            if(i > 0 && nums[i] == nums[i - 1]) continue;
-            if(nums[i] + nums[i + 1] + nums[i + 2] + nums[i + 3] > target) break;   //min > target
-            if(nums[i] + nums[n - 3] + nums[n - 2] + nums[n - 1] < target) continue;//max < target
-            for(int j = i + 1; j < n - 2; j++) {
-                //判断当前锚点是否可能
-                if(j > i + 1 && nums[j] == nums[j - 1]) continue;
-                if(nums[i] + nums[j] + nums[j + 2] + nums[j + 3] > target) break;   //min > target
-                if(nums[i] + nums[j] + nums[n - 2] + nums[n - 1] < target) continue;//max < target
-                //
-                int left = j + 1;
-                int right = n - 1;
-                while(left < right) {
-                    int curr = nums[i] + nums[j] + nums[left] + nums[right];
-                    if(curr < target) ++left;
-                    else if(curr > target) --right;
-                    else {
-                        vector<int> vec = {nums[i], nums[j], nums[left], nums[right]};
-                        ret.push_back(vec);
-                        
-                        while(left < right && vec[2] == nums[left]) ++left;
-                        while(left < right && vec[3] == nums[right]) --right;
-                    }
-                }
+    ListNode* mergeKLists(vector<ListNode*>& lists) {
+        if(lists.empty()) return nullptr;
+        
+        while(lists.size() > 1) {
+            int n = lists.size();
+            //megerTwo [n/2, n/2 + 1)
+            vector<ListNode*> newLists;
+            newLists.reserve(n);
+            int i = 0;
+            while(i < n / 2 * 2 - 1){
+                newLists.push_back(mergeTwo(lists[i], lists[i + 1]));
+                i += 2;
             }
+            if(n % 2) newLists.push_back(lists.back());
+            swap(lists, newLists);
         }
-        return ret;
+        return lists.front();
+    }
+    ListNode* mergeTwo(ListNode* l1, ListNode* l2) {
+        if(l1 == nullptr) return l2;
+        if(l2 == nullptr) return l1;
+        if(l1->val > l2->val) {
+            l2->next = mergeTwo(l1, l2->next);
+            return l2;
+        }
+        else {
+            l1->next = mergeTwo(l1->next, l2);
+            return l1;
+        }
     }
 };
